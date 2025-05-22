@@ -148,4 +148,4 @@ class PurchaseItem(Base):
 
     purchase_rel = relationship("Purchase", back_populates="items")
     product_rel = relationship("Product", back_populates="order_items")
-    size_rel = relationship("Size", back_populates="purchase_items") # Adicionado back_populates para Size
+    size_rel = relationship("Size", back_populates="purchase_items") 
