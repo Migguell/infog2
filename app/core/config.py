@@ -1,10 +1,14 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "postgresql+psycopg2://user:password@db:5432/lu_estilo_db"
+    DATABASE_URL: str = os.getenv("DATABASE_URL")
     
-    SECRET_KEY: str = "sua_chave_secreta_muito_segura_aqui_e_troque_em_producao"
+    SECRET_KEY: str = os.getenv("SECRET_KEY")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
