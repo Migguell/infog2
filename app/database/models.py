@@ -35,7 +35,7 @@ class Client(Base):
     created_at = Column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc), nullable=False)
     updated_at = Column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc), onupdate=datetime.datetime.now(datetime.timezone.utc), nullable=False)
 
-    orders = relationship("Order", back_populates="client")
+    orders = relationship("Purchase", back_populates="client_rel")
 
     def __repr__(self):
         return f"<Client(id='{self.id}', name='{self.name}', email='{self.email}')>"
@@ -50,6 +50,7 @@ class Size(Base):
     updated_at = Column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc), onupdate=datetime.datetime.now(datetime.timezone.utc), nullable=False)
 
     products = relationship("Product", back_populates="size")
+    purchase_items = relationship("PurchaseItem", back_populates="size_rel")
 
     def __repr__(self):
         return f"<Size(id={self.id}, name='{self.name}')>"
@@ -94,6 +95,7 @@ class Product(Base):
     category = relationship("Category", back_populates="products")
     gender = relationship("Gender", back_populates="products")
     images = relationship("ProductImage", back_populates="product")
+    order_items = relationship("PurchaseItem", back_populates="product_rel")
     created_at = Column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc), nullable=False)
     updated_at = Column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc), onupdate=datetime.datetime.now(datetime.timezone.utc), nullable=False)
 
@@ -114,3 +116,36 @@ class ProductImage(Base):
 
     def __repr__(self):
         return f"<ProductImage(id='{self.id}', product_id='{self.product_id}', url='{self.url[:30]}...')>"
+
+class Purchase(Base):
+    __tablename__ = "purchases"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    client_id = Column(UUID(as_uuid=True), ForeignKey('clients.id'), nullable=False)
+    subtotal = Column(Numeric(10, 2), nullable=False, default=0.0)
+    status = Column(String(50), nullable=False, default="pending")
+    created_at = Column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc), onupdate=datetime.datetime.now(datetime.timezone.utc), nullable=False)
+
+    client_rel = relationship("Client", back_populates="orders")
+    items = relationship("PurchaseItem", back_populates="purchase_rel", cascade="all, delete-orphan", lazy='dynamic')
+
+    def __repr__(self):
+        return f"<Purchase(id='{self.id}', client_id='{self.client_id}', status='{self.status}', subtotal={self.subtotal})>"
+
+class PurchaseItem(Base):
+    __tablename__ = "purchase_items"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    purchase_id = Column(UUID(as_uuid=True), ForeignKey('purchases.id'), nullable=False)
+    product_id = Column(UUID(as_uuid=True), ForeignKey('products.id'), nullable=False)
+    size_id = Column(Integer, ForeignKey('sizes.id'), nullable=False)
+    quantity = Column(Integer, nullable=False)
+    unit_price_at_purchase = Column(Numeric(10, 2), nullable=False)
+    total_price = Column(Numeric(10, 2), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc), onupdate=datetime.datetime.now(datetime.timezone.utc), nullable=False)
+
+    purchase_rel = relationship("Purchase", back_populates="items")
+    product_rel = relationship("Product", back_populates="order_items")
+    size_rel = relationship("Size", back_populates="purchase_items") # Adicionado back_populates para Size
