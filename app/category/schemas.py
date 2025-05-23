@@ -17,3 +17,5 @@ class CategoryResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class MessageResponse(BaseModel):
+    message: str

@@ -62,7 +62,7 @@ def update_product_route(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
     return db_product
 
-@router.delete("/delete/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete/{product_id}", response_model=schemas.MessageResponse, status_code=status.HTTP_200_OK)
 def delete_product_route(
     product_id: uuid.UUID,
     db: Session = Depends(get_db),
@@ -71,5 +71,4 @@ def delete_product_route(
     success = services.delete_product(db, product_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
-    return
-
+    return {"message": f"Produto com ID {product_id} deletado com sucesso."}

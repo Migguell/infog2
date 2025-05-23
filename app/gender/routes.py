@@ -54,7 +54,7 @@ def update_gender_route(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Gênero não encontrado")
     return db_gender
 
-@router.delete("/delete/{gender_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete/{gender_id}", response_model=schemas.MessageResponse, status_code=status.HTTP_200_OK)
 def delete_gender_route(
     gender_id: int,
     db: Session = Depends(get_db),
@@ -63,5 +63,4 @@ def delete_gender_route(
     success = services.delete_gender(db, gender_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Gênero não encontrado")
-    return
-
+    return {"message": f"Gênero com ID {gender_id} deletado com sucesso."}

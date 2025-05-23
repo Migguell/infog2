@@ -56,7 +56,7 @@ def update_product_image_route(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Imagem não encontrada")
     return db_image
 
-@router.delete("/delete/{image_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete/{image_id}", response_model=schemas.MessageResponse, status_code=status.HTTP_200_OK)
 def delete_product_image_route(
     image_id: uuid.UUID,
     db: Session = Depends(get_db),
@@ -65,5 +65,4 @@ def delete_product_image_route(
     success = services.delete_product_image(db, image_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Imagem não encontrada")
-    return
-
+    return {"message": f"Imagem com ID {image_id} deletada com sucesso."}

@@ -65,7 +65,7 @@ def update_purchase_route(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pedido não encontrado")
     return db_purchase
 
-@router.delete("/delete/{purchase_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete/{purchase_id}", response_model=schemas.MessageResponse, status_code=status.HTTP_200_OK)
 def delete_purchase_route(
     purchase_id: uuid.UUID,
     db: Session = Depends(get_db),
@@ -74,5 +74,4 @@ def delete_purchase_route(
     success = services.delete_purchase(db, purchase_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pedido não encontrado")
-    return
-
+    return {"message": f"Pedido com ID {purchase_id} deletado com sucesso."}

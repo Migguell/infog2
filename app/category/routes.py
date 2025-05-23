@@ -54,7 +54,7 @@ def update_category_route(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoria não encontrada")
     return db_category
 
-@router.delete("/delete/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete/{category_id}", response_model=schemas.MessageResponse, status_code=status.HTTP_200_OK)
 def delete_category_route(
     category_id: int,
     db: Session = Depends(get_db),
@@ -63,5 +63,4 @@ def delete_category_route(
     success = services.delete_category(db, category_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoria não encontrada")
-    return
-
+    return {"message": f"Categoria com ID {category_id} deletada com sucesso."}
