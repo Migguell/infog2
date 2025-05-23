@@ -68,12 +68,8 @@ def authenticate_user(db: Session, email: str, password: str) -> Optional[models
     return user
 
 def create_token_response(user: models.User) -> schemas.Token:
-    # Define o tempo de expiração do token de acesso
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    # Cria o token de acesso
     access_token = create_access_token(
         data={"sub": str(user.id), "is_admin": user.is_admin}, expires_delta=access_token_expires
     )
-    # Retorna o token no formato do schema Token
     return schemas.Token(access_token=access_token, token_type="bearer")
-

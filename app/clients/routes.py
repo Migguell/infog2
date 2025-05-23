@@ -10,7 +10,7 @@ from app.core.dependencies import get_current_active_user, get_current_admin_use
 
 router = APIRouter(
     prefix="/clients",
-    tags=["Clientes"]
+    tags=["Clients"]
 )
 
 @router.post("/create", response_model=schemas.ClientResponse, status_code=status.HTTP_201_CREATED)

@@ -29,9 +29,8 @@ class Client(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, nullable=False, index=True)
-    phone = Column(String(20), nullable=True)
     cpf = Column(String(11), unique=True, nullable=False, index=True)
-    address = Column(String(500), nullable=True)
+    hashed_password = Column(String(255), nullable=False)
     created_at = Column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc), nullable=False)
     updated_at = Column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc), onupdate=datetime.datetime.now(datetime.timezone.utc), nullable=False)
 

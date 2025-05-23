@@ -28,7 +28,6 @@ def create_client(db: Session, client_data: schemas.ClientCreate) -> models.Clie
         name=client_data.name,
         email=client_data.email,
         cpf=client_data.cpf,
-        address=client_data.address
     )
     db.add(db_client)
     db.commit()
