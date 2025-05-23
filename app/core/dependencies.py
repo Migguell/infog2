@@ -7,6 +7,7 @@ from app.core.config import get_settings
 from app.database.connection import get_db
 from app.auth import schemas
 from app.database import models
+import uuid
 
 settings = get_settings()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
