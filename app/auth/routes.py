@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import Annotated
 from datetime import timedelta
@@ -21,10 +20,10 @@ def register_user_route(user_data: schemas.UserCreate, db: Session = Depends(get
 
 @router.post("/login", response_model=schemas.Token)
 def login_for_access_token(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    user_login: schemas.UserLogin,
     db: Session = Depends(get_db)
 ):
-    user = services.authenticate_user(db, form_data.username, form_data.password)
+    user = services.authenticate_user(db, user_login.email, user_login.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -35,7 +34,7 @@ def login_for_access_token(
 
 @router.post("/refresh-token", response_model=schemas.Token)
 def refresh_access_token(
-    current_user: Annotated[models.User, Depends(get_current_active_user)],
+    current_user: Annotated[models.User, Depends(get_current_active_user)] = None,
     db: Session = Depends(get_db)
 ):
     return services.create_token_response(current_user)
