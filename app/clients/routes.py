@@ -10,7 +10,7 @@ from app.core.dependencies import get_current_active_user, get_current_admin_use
 
 router = APIRouter(
     prefix="/clients",
-    tags=["Clientes"]
+    tags=["Clients"]
 )
 
 @router.post("/create", response_model=schemas.ClientCreateResponse, status_code=status.HTTP_201_CREATED)
@@ -20,9 +20,6 @@ def create_client_route(
 ):
     db_client = services.create_client(db, client_data)
     
-    # Explicitamente cria um dicionário a partir do objeto db_client
-    # para garantir que o Pydantic receba todos os atributos esperados.
-    # O campo 'address' foi removido daqui para corresponder ao schema ClientResponse.
     client_response_data = {
         "id": db_client.id,
         "name": db_client.name,
@@ -60,7 +57,7 @@ def read_client_route(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente não encontrado")
     return db_client
 
-@router.put("/{client_id}", response_model=schemas.ClientResponse)
+@router.put("/update/{client_id}", response_model=schemas.ClientResponse)
 def update_client_route(
     client_id: uuid.UUID,
     client_data: schemas.ClientUpdate,
@@ -72,7 +69,7 @@ def update_client_route(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente não encontrado")
     return db_client
 
-@router.delete("/delete/{client_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete/{client_id}", response_model=schemas.MessageResponse, status_code=status.HTTP_200_OK)
 def delete_client_route(
     client_id: uuid.UUID,
     db: Session = Depends(get_db),
@@ -81,5 +78,5 @@ def delete_client_route(
     success = services.delete_client(db, client_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cliente não encontrado")
-    return
-
+    
+    return {"message": f"Cliente com ID {client_id} deletado com sucesso."}

@@ -30,3 +30,6 @@ class ClientResponse(BaseModel):
 class ClientCreateResponse(BaseModel):
     client: ClientResponse
     token: Token
+
+class MessageResponse(BaseModel):
+    message: str
