@@ -51,4 +51,3 @@ async def get_current_admin_user(
             detail="Acesso negado. Requer privilégios de administrador."
         )
     return current_user
-
