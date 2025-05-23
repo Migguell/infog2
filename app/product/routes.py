@@ -4,20 +4,20 @@ from typing import List, Optional, Annotated
 import uuid
 
 from app.database.connection import get_db
-from app.products import schemas, services
+from app.product import schemas, services
 from app.database import models
 from app.core.dependencies import get_current_active_user, get_current_admin_user
 
 router = APIRouter(
     prefix="/products",
-    tags=["Produtos"]
+    tags=["Products"]
 )
 
 @router.post("/create", response_model=schemas.ProductResponse, status_code=status.HTTP_201_CREATED)
 def create_product_route(
     product_data: schemas.ProductCreate,
     db: Session = Depends(get_db),
-    current_user: Annotated[models.User, Depends(get_current_active_user)]
+    current_user: Annotated[models.User, Depends(get_current_active_user)] = None
 ):
     db_product = services.create_product(db, product_data)
     return db_product
@@ -32,7 +32,7 @@ def read_products_route(
     max_price: Optional[float] = Query(None),
     available_only: bool = Query(False),
     db: Session = Depends(get_db),
-    current_user: Annotated[models.User, Depends(get_current_active_user)]
+    current_user: Annotated[models.User, Depends(get_current_active_user)] = None
 ):
     products = services.get_products(db, skip=skip, limit=limit, category_id=category_id,
                                      gender_id=gender_id, min_price=min_price,
@@ -43,7 +43,7 @@ def read_products_route(
 def read_product_route(
     product_id: uuid.UUID,
     db: Session = Depends(get_db),
-    current_user: Annotated[models.User, Depends(get_current_active_user)]
+    current_user: Annotated[models.User, Depends(get_current_active_user)] = None
 ):
     db_product = services.get_product(db, product_id)
     if db_product is None:
@@ -55,7 +55,7 @@ def update_product_route(
     product_id: uuid.UUID,
     product_data: schemas.ProductUpdate,
     db: Session = Depends(get_db),
-    current_user: Annotated[models.User, Depends(get_current_active_user)]
+    current_user: Annotated[models.User, Depends(get_current_active_user)] = None
 ):
     db_product = services.update_product(db, product_id, product_data)
     if db_product is None:
@@ -66,7 +66,7 @@ def update_product_route(
 def delete_product_route(
     product_id: uuid.UUID,
     db: Session = Depends(get_db),
-    current_user: Annotated[models.User, Depends(get_current_admin_user)]
+    current_user: Annotated[models.User, Depends(get_current_admin_user)] = None
 ):
     success = services.delete_product(db, product_id)
     if not success:

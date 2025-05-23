@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from app.database import models
-from app.genders import schemas
+from app.gender import schemas
 from typing import List, Optional
 
 def get_gender_by_name(db: Session, name: str) -> Optional[models.Gender]:

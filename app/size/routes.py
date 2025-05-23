@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional, Annotated
 
 from app.database.connection import get_db
-from app.sizes import schemas, services
+from app.size import schemas, services
 from app.database import models
 from app.core.dependencies import get_current_active_user, get_current_admin_user
 
@@ -16,7 +16,7 @@ router = APIRouter(
 def create_size_route(
     size_data: schemas.SizeCreate,
     db: Session = Depends(get_db),
-    current_user: Annotated[models.User, Depends(get_current_active_user)]
+    current_user: Annotated[models.User, Depends(get_current_active_user)] = None
 ):
     db_size = services.create_size(db, size_data)
     return db_size
@@ -26,7 +26,7 @@ def read_sizes_route(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
     db: Session = Depends(get_db),
-    current_user: Annotated[models.User, Depends(get_current_active_user)]
+    current_user: Annotated[models.User, Depends(get_current_active_user)] = None
 ):
     sizes = services.get_sizes(db, skip=skip, limit=limit)
     return sizes
@@ -35,7 +35,7 @@ def read_sizes_route(
 def read_size_route(
     size_id: int,
     db: Session = Depends(get_db),
-    current_user: Annotated[models.User, Depends(get_current_active_user)]
+    current_user: Annotated[models.User, Depends(get_current_active_user)] = None
 ):
     db_size = services.get_size(db, size_id)
     if db_size is None:
@@ -47,7 +47,7 @@ def update_size_route(
     size_id: int,
     size_data: schemas.SizeUpdate,
     db: Session = Depends(get_db),
-    current_user: Annotated[models.User, Depends(get_current_active_user)]
+    current_user: Annotated[models.User, Depends(get_current_active_user)] = None
 ):
     db_size = services.update_size(db, size_id, size_data)
     if db_size is None:
@@ -58,7 +58,7 @@ def update_size_route(
 def delete_size_route(
     size_id: int,
     db: Session = Depends(get_db),
-    current_user: Annotated[models.User, Depends(get_current_admin_user)]
+    current_user: Annotated[models.User, Depends(get_current_admin_user)] = None
 ):
     success = services.delete_size(db, size_id)
     if not success:

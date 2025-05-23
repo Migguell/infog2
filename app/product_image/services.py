@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from app.database import models
-from app.product_images import schemas
+from app.product_image import schemas
 from typing import List, Optional
 import uuid
 

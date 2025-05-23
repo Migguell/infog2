@@ -5,7 +5,7 @@ import uuid
 from datetime import datetime
 
 from app.database.connection import get_db
-from app.purchases import schemas, services
+from app.purchase import schemas, services
 from app.database import models
 from app.core.dependencies import get_current_active_user, get_current_admin_user
 
@@ -18,7 +18,7 @@ router = APIRouter(
 def create_purchase_route(
     purchase_data: schemas.PurchaseCreate,
     db: Session = Depends(get_db),
-    current_user: Annotated[models.User, Depends(get_current_active_user)]
+    current_user: Annotated[models.User, Depends(get_current_active_user)] = None
 ):
     db_purchase = services.create_purchase(db, purchase_data)
     return db_purchase
@@ -34,7 +34,7 @@ def read_purchases_route(
     product_section_category_id: Optional[int] = Query(None),
     product_section_gender_id: Optional[int] = Query(None),
     db: Session = Depends(get_db),
-    current_user: Annotated[models.User, Depends(get_current_active_user)]
+    current_user: Annotated[models.User, Depends(get_current_active_user)] = None
 ):
     purchases = services.get_purchases(db, skip=skip, limit=limit, client_id=client_id,
                                        status=status, start_date=start_date, end_date=end_date,
@@ -46,7 +46,7 @@ def read_purchases_route(
 def read_purchase_route(
     purchase_id: uuid.UUID,
     db: Session = Depends(get_db),
-    current_user: Annotated[models.User, Depends(get_current_active_user)]
+    current_user: Annotated[models.User, Depends(get_current_active_user)] = None
 ):
     db_purchase = services.get_purchase(db, purchase_id)
     if db_purchase is None:
@@ -58,7 +58,7 @@ def update_purchase_route(
     purchase_id: uuid.UUID,
     purchase_data: schemas.PurchaseUpdate,
     db: Session = Depends(get_db),
-    current_user: Annotated[models.User, Depends(get_current_active_user)]
+    current_user: Annotated[models.User, Depends(get_current_active_user)] = None
 ):
     db_purchase = services.update_purchase(db, purchase_id, purchase_data)
     if db_purchase is None:
@@ -69,7 +69,7 @@ def update_purchase_route(
 def delete_purchase_route(
     purchase_id: uuid.UUID,
     db: Session = Depends(get_db),
-    current_user: Annotated[models.User, Depends(get_current_admin_user)]
+    current_user: Annotated[models.User, Depends(get_current_admin_user)] = None
 ):
     success = services.delete_purchase(db, purchase_id)
     if not success:

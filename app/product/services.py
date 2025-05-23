@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_
 from fastapi import HTTPException, status
 from app.database import models
-from app.products import schemas
+from app.product import schemas
 from typing import List, Optional
 import uuid
 

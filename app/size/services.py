@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from app.database import models
-from app.sizes import schemas
+from app.size import schemas
 from typing import List, Optional
 
 def get_size_by_name(db: Session, name: str) -> Optional[models.Size]:

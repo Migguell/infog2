@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from app.database import models
-from app.categories import schemas
+from app.category import schemas
 from typing import List, Optional
 
 def get_category_by_name(db: Session, name: str) -> Optional[models.Category]:

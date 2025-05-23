@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session, joinedload
 from fastapi import HTTPException, status
 from app.database import models
-from app.purchases import schemas
+from app.purchase import schemas
 from typing import List, Optional
 import uuid
 from datetime import datetime, timedelta
