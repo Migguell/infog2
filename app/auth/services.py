@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone # timedelta ainda é necessário para o timedelta(minutes=...)
 from jose import JWTError, jwt
 from fastapi import HTTPException, status, Depends
 from app.core.config import get_settings
@@ -8,6 +8,8 @@ from app.database import models
 from app.auth import schemas
 from typing import Optional
 import uuid
+
+# create_token_response e create_access_token foram movidos para app/core/dependencies.py
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -18,16 +20,6 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
-
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
-    else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-    return encoded_jwt
 
 def get_user_by_email(db: Session, email: str) -> Optional[models.User]:
     return db.query(models.User).filter(models.User.email == email).first()
@@ -67,9 +59,3 @@ def authenticate_user(db: Session, email: str, password: str) -> Optional[models
         return None
     return user
 
-def create_token_response(user: models.User) -> schemas.Token:
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": str(user.id), "is_admin": user.is_admin}, expires_delta=access_token_expires
-    )
-    return schemas.Token(access_token=access_token, token_type="bearer")

@@ -6,21 +6,36 @@ import uuid
 from app.database.connection import get_db
 from app.clients import schemas, services
 from app.database import models
-from app.core.dependencies import get_current_active_user, get_current_admin_user
+from app.core.dependencies import get_current_active_user, get_current_admin_user, create_token_response
 
 router = APIRouter(
     prefix="/clients",
-    tags=["Clients"]
+    tags=["Clientes"]
 )
 
-@router.post("/create", response_model=schemas.ClientResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/create", response_model=schemas.ClientCreateResponse, status_code=status.HTTP_201_CREATED)
 def create_client_route(
     client_data: schemas.ClientCreate,
-    db: Session = Depends(get_db),
-    current_user: Annotated[models.User, Depends(get_current_active_user)] = None
+    db: Session = Depends(get_db)
 ):
     db_client = services.create_client(db, client_data)
-    return db_client
+    
+    # Explicitamente cria um dicionário a partir do objeto db_client
+    # para garantir que o Pydantic receba todos os atributos esperados.
+    # O campo 'address' foi removido daqui para corresponder ao schema ClientResponse.
+    client_response_data = {
+        "id": db_client.id,
+        "name": db_client.name,
+        "email": db_client.email,
+        "cpf": db_client.cpf,
+        "created_at": db_client.created_at,
+        "updated_at": db_client.updated_at,
+    }
+
+    return schemas.ClientCreateResponse(
+        client=schemas.ClientResponse(**client_response_data),
+        token=create_token_response(subject_id=db_client.id, is_client=True)
+    )
 
 @router.get("/read", response_model=List[schemas.ClientResponse])
 def read_clients_route(
@@ -61,7 +76,7 @@ def update_client_route(
 def delete_client_route(
     client_id: uuid.UUID,
     db: Session = Depends(get_db),
-    current_user: Annotated[models.User, Depends(get_current_admin_user)] = None # Apenas admins podem deletar
+    current_user: Annotated[models.User, Depends(get_current_admin_user)] = None
 ):
     success = services.delete_client(db, client_id)
     if not success:

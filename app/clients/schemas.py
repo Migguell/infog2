@@ -2,6 +2,7 @@ from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 from datetime import datetime
 import uuid
+from app.auth.schemas import Token # Importar o schema de Token
 
 class ClientCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
@@ -25,3 +26,7 @@ class ClientResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class ClientCreateResponse(BaseModel):
+    client: ClientResponse
+    token: Token
