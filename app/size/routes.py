@@ -54,7 +54,7 @@ def update_size_route(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tamanho não encontrado")
     return db_size
 
-@router.delete("/delete/{size_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete/{size_id}", response_model=schemas.MessageResponse, status_code=status.HTTP_200_OK)
 def delete_size_route(
     size_id: int,
     db: Session = Depends(get_db),
@@ -63,5 +63,5 @@ def delete_size_route(
     success = services.delete_size(db, size_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tamanho não encontrado")
-    return
-
+    
+    return {"message": f"Tamanho com ID {size_id} deletado com sucesso."}
