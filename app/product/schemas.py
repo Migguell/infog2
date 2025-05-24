@@ -1,25 +1,12 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List
 from datetime import datetime
 import uuid
 from decimal import Decimal
+from app.product_image.schemas import ProductImageResponse # <--- Importado de product_image.schemas
 
-class ProductImageCreate(BaseModel):
-    url: str = Field(..., max_length=500)
-    description: Optional[str] = Field(None, max_length=255)
-    is_main: bool = False
-
-class ProductImageResponse(BaseModel):
-    id: uuid.UUID
-    product_id: uuid.UUID
-    url: str
-    description: Optional[str]
-    is_main: bool
-    created_at: datetime
-    updated_at: datetime
-
-    class Config:
-        from_attributes = True
+# ProductImageCreate e ProductImageResponse NÃO SÃO MAIS DEFINIDOS AQUI.
+# Eles devem estar no arquivo app/product_image/schemas.py.
 
 class ProductCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
@@ -29,7 +16,7 @@ class ProductCreate(BaseModel):
     size_id: int
     category_id: int
     gender_id: int
-    images: Optional[List[ProductImageCreate]] = None
+    product_image_ids: Optional[List[uuid.UUID]] = None # <--- Alterado para lista de IDs de imagens
 
 class ProductUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=255)
@@ -39,7 +26,7 @@ class ProductUpdate(BaseModel):
     size_id: Optional[int] = None
     category_id: Optional[int] = None
     gender_id: Optional[int] = None
-    images: Optional[List[ProductImageCreate]] = None
+    product_image_ids: Optional[List[uuid.UUID]] = None # <--- Alterado para lista de IDs de imagens
 
 class ProductResponse(BaseModel):
     id: uuid.UUID
@@ -52,10 +39,10 @@ class ProductResponse(BaseModel):
     gender_id: int
     created_at: datetime
     updated_at: datetime
-    images: List[ProductImageResponse] = []
+    images: List[ProductImageResponse] = [] # <--- Tipo continua sendo ProductImageResponse
 
-    class Config:
-        from_attributes = True
+    # APENAS model_config DEVE EXISTIR. A CLASSE 'Config' FOI REMOVIDA para evitar o erro.
+    model_config = ConfigDict(from_attributes=True)
 
 class MessageResponse(BaseModel):
     message: str

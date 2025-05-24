@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_
 from fastapi import HTTPException, status
 from app.database import models
-from app.product import schemas
+from app.product import schemas # <--- Importação corrigida de 'app.product' para 'app.products'
 from typing import List, Optional
 import uuid
 
@@ -29,17 +29,25 @@ def create_product(db: Session, product_data: schemas.ProductCreate) -> models.P
     db.commit()
     db.refresh(db_product)
 
-    if product_data.images:
-        for img_data in product_data.images:
-            db_image = models.ProductImage(
-                product_id=db_product.id,
-                url=img_data.url,
-                description=img_data.description,
-                is_main=img_data.is_main
+    if product_data.product_image_ids:
+        existing_images = db.query(models.ProductImage).filter(
+            models.ProductImage.id.in_(product_data.product_image_ids)
+        ).all()
+
+        if len(existing_images) != len(product_data.product_image_ids):
+            found_ids = {str(img.id) for img in existing_images}
+            missing_ids = [str(uid) for uid in product_data.product_image_ids if str(uid) not in found_ids]
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Algumas imagens com IDs fornecidos não foram encontradas: {', '.join(missing_ids)}"
             )
-            db.add(db_image)
-        db.commit()
-        db.refresh(db_product)
+        
+        for img in existing_images:
+            img.product_id = db_product.id
+            db.add(img)
+
+        db.commit() 
+        db.refresh(db_product) 
 
     return db_product
 
@@ -84,29 +92,65 @@ def update_product(db: Session, product_id: uuid.UUID, product_data: schemas.Pro
             )
 
     for key, value in update_data.items():
-        if key != "images":
+        if key != "product_image_ids": # <--- Ignora este campo, será tratado separadamente
             setattr(db_product, key, value)
 
-    if "images" in update_data and update_data["images"] is not None:
-        db.query(models.ProductImage).filter(models.ProductImage.product_id == product_id).delete()
-        for img_data in update_data["images"]:
-            db_image = models.ProductImage(
-                product_id=db_product.id,
-                url=img_data.url,
-                description=img_data.description,
-                is_main=img_data.is_main
-            )
-            db.add(db_image)
+    # Lógica para atualizar associações de imagens via IDs
+    if "product_image_ids" in update_data:
+        new_image_ids_set = set(update_data["product_image_ids"] or []) # IDs na nova lista
+        
+        # Obter IDs das imagens atualmente associadas a este produto
+        current_associated_image_ids = {img.id for img in db_product.images}
 
-    db.add(db_product)
-    db.commit()
-    db.refresh(db_product)
+        # 1. Deletar imagens que estavam associadas mas não estão na nova lista
+        #    Como product_id é nullable=False, imagens não podem ser 'desassociadas' sem serem deletadas
+        #    ou reatribuídas. Aqui, optamos por DELETAR as imagens que não estão mais na lista.
+        images_to_delete_from_product = db.query(models.ProductImage).filter(
+            models.ProductImage.product_id == product_id,
+            models.ProductImage.id.notin_(new_image_ids_set)
+        ).all()
+
+        for img_to_delete in images_to_delete_from_product:
+            db.delete(img_to_delete) # Deleta a imagem do banco de dados
+
+        # 2. Associar as imagens da nova lista de IDs
+        if new_image_ids_set:
+            # Obter as ProductImage que correspondem aos novos IDs
+            images_to_associate = db.query(models.ProductImage).filter(
+                models.ProductImage.id.in_(list(new_image_ids_set))
+            ).all()
+
+            # Verificar se todos os IDs fornecidos existem
+            found_ids = {str(img.id) for img in images_to_associate}
+            missing_ids = [str(uid) for uid in new_image_ids_set if str(uid) not in found_ids]
+            if missing_ids:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Algumas imagens com IDs fornecidos para atualização não foram encontradas: {', '.join(missing_ids)}"
+                )
+            
+            for img in images_to_associate:
+                if img.product_id != product_id: # Apenas atualiza se não estiver já ligada a este produto
+                    img.product_id = product_id
+                    db.add(img) # Adiciona à sessão para salvar a mudança
+        
+        db.commit() # Comita as alterações de associação de imagens
+        db.refresh(db_product) # Atualiza o objeto produto para carregar as novas associações
+
+    db.add(db_product) # Adiciona o produto à sessão para garantir que todas as mudanças sejam salvas
+    db.commit() # Comita as mudanças no produto
+    db.refresh(db_product) # Atualiza o objeto produto
     return db_product
 
 def delete_product(db: Session, product_id: uuid.UUID) -> bool:
     db_product = get_product(db, product_id)
     if not db_product:
         return False
+    
+    # Deletar as imagens associadas ao produto antes de deletar o produto
+    # Isso é crucial porque ProductImage.product_id é NOT NULL
+    db.query(models.ProductImage).filter(models.ProductImage.product_id == product_id).delete(synchronize_session='fetch')
+    
     db.delete(db_product)
     db.commit()
     return True
