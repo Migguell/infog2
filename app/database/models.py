@@ -127,7 +127,7 @@ class Purchase(Base):
     updated_at = Column(DateTime(timezone=True), default=datetime.datetime.now(datetime.timezone.utc), onupdate=datetime.datetime.now(datetime.timezone.utc), nullable=False)
 
     client_rel = relationship("Client", back_populates="orders")
-    items = relationship("PurchaseItem", back_populates="purchase_rel", cascade="all, delete-orphan", lazy='select') # <--- ALTERADO AQUI
+    items = relationship("PurchaseItem", back_populates="purchase_rel", cascade="all, delete-orphan", lazy='select')
 
     def __repr__(self):
         return f"<Purchase(id='{self.id}', client_id='{self.client_id}', status='{self.status}', subtotal={self.subtotal})>"

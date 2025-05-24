@@ -1,42 +1,23 @@
-# Conteúdo do arquivo: .gitignore
-# Arquivos e diretórios a serem ignorados pelo Git.
-
-# Ambientes virtuais
 .venv/
 venv/
 env/
 
-# Arquivos de bytecode Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# Arquivos de log e monitoramento
 *.log
 *.sqlite3
 sentry/
 
-# Variáveis de ambiente
 .env
-.env.*local # Para outros arquivos de ambiente como .env.development.local
+.env.*local
 
-# Arquivos de Docker
-# Se você tiver um Dockerfile.dev ou outros arquivos de build temporários
-# Descomente se você não quer versionar a imagem construída localmente (geralmente não queremos)
-# docker-compose.override.yml # Se você tiver um arquivo de override para dev local
-
-# Arquivos específicos do sistema operacional
 .DS_Store # macOS
 Thumbs.db # Windows
 
-# Alembic
-# O arquivo alembic.ini deve ser versionado, mas os scripts de migração gerados não precisam ser ignorados
-# pois eles fazem parte do histórico de esquema do DB.
-# As pastas de versões são incluídas intencionalmente.
-
-# Arquivos temporários ou de IDEs (opcional)
-.vscode/ # Se você usa VS Code e não quer versionar configurações específicas
-.idea/ # PyCharm
+.vscode/
+.idea/
 *.swp
 *~

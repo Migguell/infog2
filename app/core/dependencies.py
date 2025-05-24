@@ -3,8 +3,8 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 from typing import Annotated, Optional, Union
-from datetime import datetime, timedelta, timezone # Adicionado para funções de criação de token
-import uuid # Necessário para uuid.UUID
+from datetime import datetime, timedelta, timezone
+import uuid
 
 from app.core.config import get_settings
 from app.database.connection import get_db
@@ -32,12 +32,11 @@ def create_token_response(subject_id: Union[str, uuid.UUID], is_admin: bool = Fa
     """
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     
-    # Prepara os dados do payload do token
     token_data = {"sub": str(subject_id)}
     if is_admin:
         token_data["is_admin"] = True
     if is_client:
-        token_data["is_client"] = True # Adiciona um flag para identificar se é um token de cliente
+        token_data["is_client"] = True
 
     access_token = create_access_token(
         data=token_data, expires_delta=access_token_expires
