@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
-from datetime import datetime, timedelta, timezone # timedelta ainda é necessário para o timedelta(minutes=...)
+from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 from fastapi import HTTPException, status, Depends
 from app.core.config import get_settings
@@ -8,8 +8,6 @@ from app.database import models
 from app.auth import schemas
 from typing import Optional
 import uuid
-
-# create_token_response e create_access_token foram movidos para app/core/dependencies.py
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

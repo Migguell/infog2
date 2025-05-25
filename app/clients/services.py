@@ -5,7 +5,7 @@ from app.database import models
 from app.clients import schemas
 from typing import List, Optional
 import uuid
-from app.auth.services import get_password_hash # Importar a função de hash de senha
+from app.auth.services import get_password_hash
 
 def get_client_by_email(db: Session, email: str) -> Optional[models.Client]:
     return db.query(models.Client).filter(models.Client.email == email).first()
@@ -25,13 +25,13 @@ def create_client(db: Session, client_data: schemas.ClientCreate) -> models.Clie
             detail="CPF já registrado."
         )
 
-    hashed_password = get_password_hash(client_data.password) # Gerar hash da senha
+    hashed_password = get_password_hash(client_data.password)
 
     db_client = models.Client(
         name=client_data.name,
         email=client_data.email,
         cpf=client_data.cpf,
-        hashed_password=hashed_password, # <--- Esta linha foi adicionada/corrigida
+        hashed_password=hashed_password,
     )
     db.add(db_client)
     db.commit()
@@ -75,10 +75,9 @@ def update_client(db: Session, client_id: uuid.UUID, client_data: schemas.Client
                 detail="Novo CPF já registrado por outro cliente."
             )
     
-    # Se a senha for fornecida na atualização, faça o hash
     if "password" in update_data and update_data["password"] is not None:
         update_data["hashed_password"] = get_password_hash(update_data["password"])
-        del update_data["password"] # Remove o campo de senha em texto claro
+        del update_data["password"]
 
     for key, value in update_data.items():
         setattr(db_client, key, value)
@@ -95,4 +94,3 @@ def delete_client(db: Session, client_id: uuid.UUID) -> bool:
     db.delete(db_client)
     db.commit()
     return True
-

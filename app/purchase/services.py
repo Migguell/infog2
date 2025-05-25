@@ -75,7 +75,7 @@ def get_purchases(
     product_section_category_id: Optional[int] = None,
     product_section_gender_id: Optional[int] = None
 ) -> List[models.Purchase]:
-    query = db.query(models.Purchase).options(joinedload(models.Purchase.items).joinedload(models.PurchaseItem.product_rel)) # <--- CORRIGIDO AQUI
+    query = db.query(models.Purchase).options(joinedload(models.Purchase.items).joinedload(models.PurchaseItem.product_rel))
 
     if client_id:
         query = query.filter(models.Purchase.client_id == client_id)
@@ -87,7 +87,7 @@ def get_purchases(
         query = query.filter(models.Purchase.created_at <= end_date)
     
     if product_section_category_id or product_section_gender_id:
-        query = query.join(models.Purchase.items).join(models.PurchaseItem.product_rel) # <--- CORRIGIDO AQUI
+        query = query.join(models.Purchase.items).join(models.PurchaseItem.product_rel)
         if product_section_category_id:
             query = query.filter(models.Product.category_id == product_section_category_id)
         if product_section_gender_id:
@@ -97,7 +97,7 @@ def get_purchases(
     return query.offset(skip).limit(limit).all()
 
 def get_purchase(db: Session, purchase_id: uuid.UUID) -> Optional[models.Purchase]:
-    return db.query(models.Purchase).options(joinedload(models.Purchase.items).joinedload(models.PurchaseItem.product_rel)).filter(models.Purchase.id == purchase_id).first() # <--- CORRIGIDO AQUI
+    return db.query(models.Purchase).options(joinedload(models.Purchase.items).joinedload(models.PurchaseItem.product_rel)).filter(models.Purchase.id == purchase_id).first()
 
 def update_purchase(db: Session, purchase_id: uuid.UUID, purchase_data: schemas.PurchaseUpdate) -> Optional[models.Purchase]:
     db_purchase = get_purchase(db, purchase_id)

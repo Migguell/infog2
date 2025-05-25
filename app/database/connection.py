@@ -1,6 +1,3 @@
-# Conteúdo do arquivo: app/database/connection.py
-# Este arquivo configura a conexão com o banco de dados PostgreSQL usando SQLAlchemy.
-
 import time
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, declarative_base, Session

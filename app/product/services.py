@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_
 from fastapi import HTTPException, status
 from app.database import models
-from app.product import schemas # <--- Importação corrigida de 'app.product' para 'app.products'
+from app.product import schemas
 from typing import List, Optional
 import uuid
 
@@ -92,35 +92,27 @@ def update_product(db: Session, product_id: uuid.UUID, product_data: schemas.Pro
             )
 
     for key, value in update_data.items():
-        if key != "product_image_ids": # <--- Ignora este campo, será tratado separadamente
+        if key != "product_image_ids":
             setattr(db_product, key, value)
 
-    # Lógica para atualizar associações de imagens via IDs
     if "product_image_ids" in update_data:
-        new_image_ids_set = set(update_data["product_image_ids"] or []) # IDs na nova lista
+        new_image_ids_set = set(update_data["product_image_ids"] or [])
         
-        # Obter IDs das imagens atualmente associadas a este produto
         current_associated_image_ids = {img.id for img in db_product.images}
 
-        # 1. Deletar imagens que estavam associadas mas não estão na nova lista
-        #    Como product_id é nullable=False, imagens não podem ser 'desassociadas' sem serem deletadas
-        #    ou reatribuídas. Aqui, optamos por DELETAR as imagens que não estão mais na lista.
         images_to_delete_from_product = db.query(models.ProductImage).filter(
             models.ProductImage.product_id == product_id,
             models.ProductImage.id.notin_(new_image_ids_set)
         ).all()
 
         for img_to_delete in images_to_delete_from_product:
-            db.delete(img_to_delete) # Deleta a imagem do banco de dados
+            db.delete(img_to_delete)
 
-        # 2. Associar as imagens da nova lista de IDs
         if new_image_ids_set:
-            # Obter as ProductImage que correspondem aos novos IDs
             images_to_associate = db.query(models.ProductImage).filter(
                 models.ProductImage.id.in_(list(new_image_ids_set))
             ).all()
 
-            # Verificar se todos os IDs fornecidos existem
             found_ids = {str(img.id) for img in images_to_associate}
             missing_ids = [str(uid) for uid in new_image_ids_set if str(uid) not in found_ids]
             if missing_ids:
@@ -130,16 +122,16 @@ def update_product(db: Session, product_id: uuid.UUID, product_data: schemas.Pro
                 )
             
             for img in images_to_associate:
-                if img.product_id != product_id: # Apenas atualiza se não estiver já ligada a este produto
+                if img.product_id != product_id:
                     img.product_id = product_id
-                    db.add(img) # Adiciona à sessão para salvar a mudança
+                    db.add(img)
         
-        db.commit() # Comita as alterações de associação de imagens
-        db.refresh(db_product) # Atualiza o objeto produto para carregar as novas associações
+        db.commit()
+        db.refresh(db_product)
 
-    db.add(db_product) # Adiciona o produto à sessão para garantir que todas as mudanças sejam salvas
-    db.commit() # Comita as mudanças no produto
-    db.refresh(db_product) # Atualiza o objeto produto
+    db.add(db_product)
+    db.commit()
+    db.refresh(db_product)
     return db_product
 
 def delete_product(db: Session, product_id: uuid.UUID) -> bool:
@@ -147,11 +139,8 @@ def delete_product(db: Session, product_id: uuid.UUID) -> bool:
     if not db_product:
         return False
     
-    # Deletar as imagens associadas ao produto antes de deletar o produto
-    # Isso é crucial porque ProductImage.product_id é NOT NULL
     db.query(models.ProductImage).filter(models.ProductImage.product_id == product_id).delete(synchronize_session='fetch')
     
     db.delete(db_product)
     db.commit()
     return True
-

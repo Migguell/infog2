@@ -8,7 +8,7 @@ import uuid
 def create_product_image(db: Session, image_data: schemas.ProductImageCreate) -> models.ProductImage:
     db_image = models.ProductImage(
         product_id=image_data.product_id,
-        url=image_data.url,
+        url=str(image_data.url),
         description=image_data.description,
         is_main=image_data.is_main
     )
@@ -39,7 +39,10 @@ def update_product_image(db: Session, image_id: uuid.UUID, image_data: schemas.P
     update_data = image_data.model_dump(exclude_unset=True)
 
     for key, value in update_data.items():
-        setattr(db_image, key, value)
+        if key == "url" and value is not None:
+            setattr(db_image, key, str(value))
+        else:
+            setattr(db_image, key, value)
 
     db.add(db_image)
     db.commit()
@@ -53,4 +56,3 @@ def delete_product_image(db: Session, image_id: uuid.UUID) -> bool:
     db.delete(db_image)
     db.commit()
     return True
-

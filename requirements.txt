@@ -7,3 +7,5 @@ passlib[bcrypt]==1.7.4
 python-dotenv==1.0.1
 pydantic-settings==2.2.1
 python-jose
+pytest
+httpx
