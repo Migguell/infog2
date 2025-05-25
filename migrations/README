@@ -40,12 +40,12 @@ A API oferece funcionalidades CRUD (Criar, Ler, Atualizar, Deletar) para as segu
 
 1.  **Clone o repositório:**
     ```bash
-    git clone 
+    git clone git@github.com:Migguell/infog2.git
     cd infog2
     ```
 
 2.  **Crie e configure o arquivo `.env`:**
-    Copie o arquivo `.env.example` (se existir) para `.env` ou crie um novo `.env` na raiz do projeto com as seguintes variáveis (ajuste os valores conforme necessário):
+    Copie o arquivo `.env.example` para `.env` ou crie um novo `.env` na raiz do projeto com as seguintes variáveis:
     ```env
     DATABASE_URL=postgresql://USER:PASSWORD@HOST:PORT/DATABASE_NAME
     SECRET_KEY=sua_chave_secreta_super_segura
