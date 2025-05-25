@@ -14,8 +14,7 @@ sentry/
 .env
 .env.*local
 
-.DS_Store # macOS
-Thumbs.db # Windows
+.DS_Store
 
 .vscode/
 .idea/

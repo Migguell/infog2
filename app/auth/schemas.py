@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
 import uuid
@@ -9,9 +9,9 @@ class UserCreate(BaseModel):
     email: EmailStr = Field(..., description="Endereço de e-mail válido do usuário.")
     password: str = Field(..., min_length=6, description="Senha do usuário, com no mínimo 6 caracteres.")
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "name": "João da Silva",
                 "cpf": "12345678901",
@@ -19,30 +19,33 @@ class UserCreate(BaseModel):
                 "password": "senhaSegura123"
             }
         }
+    )
 
 class UserLogin(BaseModel):
     email: EmailStr = Field(..., description="Endereço de e-mail do usuário para login.")
     password: str = Field(..., description="Senha do usuário para login.")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "email": "joao.silva@example.com",
                 "password": "senhaSegura123"
             }
         }
+    )
 
 class Token(BaseModel):
     access_token: str = Field(description="Token de acesso JWT.")
     token_type: str = Field("bearer", description="Tipo do token (sempre 'bearer').")
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
                 "token_type": "bearer"
             }
         }
+    )
 
 class TokenData(BaseModel):
     user_id: Optional[uuid.UUID] = Field(None, description="ID do usuário extraído do token.")
@@ -58,9 +61,9 @@ class UserResponse(BaseModel):
     created_at: datetime = Field(description="Data e hora de criação do registro do usuário.")
     updated_at: datetime = Field(description="Data e hora da última atualização do registro do usuário.")
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
                 "name": "João da Silva",
@@ -72,3 +75,4 @@ class UserResponse(BaseModel):
                 "updated_at": "2024-05-24T10:30:00Z"
             }
         }
+    )
